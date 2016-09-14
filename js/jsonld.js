@@ -33,6 +33,19 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+function setTimeout(callback, delay /* …params */) {
+    if('function' !== typeof callback) throw new TypeError('callback needs to be a function');
+    //number = number || 0;
+    if('number' !== typeof delay) throw new TypeError('delay needs to be a number');
+    if(delay) {
+        xdmp.sleep(delay);
+    }
+    callback.apply(null, Array.prototype.slice.call(arguments, 2));
+    return -1; // You're hosed if the library wants to use clearTimeout()
+};
+ 
+ 
 (function() {
 
 // determine if in-browser or using node.js
