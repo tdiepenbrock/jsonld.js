@@ -87,15 +87,11 @@ function setTimeout(callback, delay /* …params */) {
          */
         jsonld.compact = function(input, ctx, options, callback) {
 
-            xdmp.log("Compacting For MDC 1");
-
             if(arguments.length < 2) {
                 return jsonld.nextTick(function() {
                     callback(new TypeError('Could not compact, too few arguments.'));
                 });
             }
-
-            xdmp.log("Compacting For MDC 2");
 
             // get arguments
             if(typeof options === 'function') {
@@ -104,8 +100,6 @@ function setTimeout(callback, delay /* …params */) {
             }
             options = options || {};
 
-            xdmp.log("Compacting For MDC 3");
-
             if(ctx === null) {
                 return jsonld.nextTick(function() {
                     callback(new JsonLdError(
@@ -113,8 +107,6 @@ function setTimeout(callback, delay /* …params */) {
                         'jsonld.CompactError', {code: 'invalid local context'}));
                 });
             }
-
-            xdmp.log("Compacting For MDC 4");
 
             // nothing to compact
             if(input === null) {
@@ -1532,7 +1524,6 @@ function setTimeout(callback, delay /* …params */) {
         jsonld.RequestQueue.prototype.wrapLoader = function(loader) {
             this._loader = loader;
             this._usePromise = (loader.length === 1);
-            xdmp.log("Wrapping Loader: " + loader.length);
             return this.add.bind(this);
         };
         jsonld.RequestQueue.prototype.add = function(url, callback) {
@@ -1752,7 +1743,6 @@ function setTimeout(callback, delay /* …params */) {
          * @param options
          */
         jsonld.documentLoaders.markLogic = function( options) {
-            xdmp.log("MarkLogic Document loader Called!");
             options = options || {};
             // var mlConnectionString = ('mlServer.connectionString' in options ? options.mlServer.connectionString : 'undefined')
             // if (mlConnectionString === 'undefined')
@@ -1764,17 +1754,13 @@ function setTimeout(callback, delay /* …params */) {
 
             var schemasDbId = ('mlServer.schemasDb' in options ? xdmp.database(options.mlServer.schemasDb) : xdmp.schemaDatabase());
 
-            xdmp.log("MarkLogic Document Loader using Schemas Database: " + xdmp.databaseName(schemasDbId));
-
             var queue = new jsonld.RequestQueue();
             if(options.usePromise) {
-                xdmp.log("Promisify... Marklogic");
                 return queue.wrapLoader(function(url) {
                     return jsonld.promisify(loadDocument, url);
                 });
             }
 
-            xdmp.log("MarkLogic Document Loader using wrapped loader")
             return queue.wrapLoader(loadDocument);
 
             function firstFromSequence(seq) {
@@ -1786,7 +1772,6 @@ function setTimeout(callback, delay /* …params */) {
             };
 
             function retrieveRemoteIRI(iri) {
-                xdmp.log("RETRIEVING REMOTE");
                 var file = fn.subsequence(
                     xdmp.httpGet(iri, {
                         headers:  {
@@ -1797,7 +1782,7 @@ function setTimeout(callback, delay /* …params */) {
                 if (typeof file === "string")
                     return file;
                 else
-                    return xdmp.unquote(xdmp.fromJsonString(xdmp.binaryDecode(file, "UTF-8")).toString()).next().value;
+                    return xdmp.unquote(xdmp.fromJsonString(xdmp.binaryDecode(file, "UTF-8")).toString());
             };
 
             function storeSchema(uri, iri, sdbid){
@@ -1805,23 +1790,19 @@ function setTimeout(callback, delay /* …params */) {
             };
 
             function retrieveSchema(uri, schemasDb) {
-                xdmp.log("FOUND IT LOCALLY!");
                 return xdmp.eval("fn.doc(\"" + uri + "\")",null,{"database":schemasDb});
             };
 
             function loadDocument(url, callback) {
-                xdmp.log("Loading Document" + url);
                 var doc;
                 var haveSchema = checkSchemaLocal(url, schemasDbId)
                 if (haveSchema.valueOf() != fn.true()) {
-                    var iri = retrieveRemoteIRI(url, schemasDbId);
+                    var iri = fn.head(retrieveRemoteIRI(url, schemasDbId));
                     storeSchema(url, iri, schemasDbId);
                     doc =  iri.toObject();
                 } else {
                     doc = fn.head(retrieveSchema(url, schemasDbId)).toObject();
                 }
-                xdmp.log("Here it is...");
-                xdmp.log(doc);
                 callback(null, {document:doc});
             };
         };
@@ -2088,7 +2069,6 @@ function setTimeout(callback, delay /* …params */) {
                     {type: type});
             }
 
-            xdmp.log("Using Document Loader: " + type )
             // set document loader
             jsonld.documentLoader = jsonld.documentLoaders[type].apply(
                 jsonld, Array.prototype.slice.call(arguments, 1));
@@ -6297,8 +6277,6 @@ function setTimeout(callback, delay /* …params */) {
          * @return the initial context.
          */
         function _getInitialContext(options) {
-
-            xdmp.log("Initial Context " + options);
 
             var base = jsonld.url.parse(options.base || '');
             return {
