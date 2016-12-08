@@ -1806,7 +1806,7 @@ function setTimeout(callback, delay /* …params */) {
 
             function retrieveSchema(uri, schemasDb) {
                 xdmp.log("FOUND IT LOCALLY!");
-                return xdmp.eval("fn.doc(\"" + uri + "\")",null,{"database":schemasDb})
+                return xdmp.eval("fn.doc(\"" + uri + "\")",null,{"database":schemasDb});
             };
 
             function loadDocument(url, callback) {
@@ -1816,13 +1816,13 @@ function setTimeout(callback, delay /* …params */) {
                 if (haveSchema.valueOf() != fn.true()) {
                     var iri = retrieveRemoteIRI(url, schemasDbId);
                     storeSchema(url, iri, schemasDbId);
-                    doc =  iri;
+                    doc =  iri.toObject();
                 } else {
-                    doc = retrieveSchema(url, schemasDbId);
+                    doc = fn.head(retrieveSchema(url, schemasDbId)).toObject();
                 }
                 xdmp.log("Here it is...");
                 xdmp.log(doc);
-                callback(null, doc);
+                callback(null, {document:doc});
             };
         };
 
@@ -3086,7 +3086,7 @@ function setTimeout(callback, delay /* …params */) {
                     validCount -= 1;
                 }
                 if(validCount !== 0) {
-                    throw new JsonLdError(
+                       throw new JsonLdError(
                         'Invalid JSON-LD syntax; an element containing "@value" may only ' +
                         'have an "@index" property and at most one other property ' +
                         'which can be "@type" or "@language".',
